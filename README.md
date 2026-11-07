@@ -1,13 +1,12 @@
 # Projet 2 INF1007 : de la donnee a l'application
 
-Equipe : Firas Msakni, Ali (a completer)
+Equipe : Firas msakni, Ali mbarek
 
 ## Description
-(A completer : domaine, ce que fait l'application.)
+...
 
 ## Jeu de donnees
-- Source et licence : (a completer)
-
+- Source et licence : ...
 ## Installation et lancement
 ```
 pip install -r requirements.txt
