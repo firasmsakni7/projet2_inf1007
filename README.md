@@ -6,7 +6,11 @@ Equipe : Firas msakni, Ali mbarek
 ...
 
 ## Jeu de donnees
-- Source et licence : ...
+- Source : « Vehicle dataset from CarDekho », par nehalbirla (Kaggle),
+  https://www.kaggle.com/datasets/nehalbirla/vehicle-dataset-from-cardekho
+- Fichier : donnees/car_details_v3.csv (8 128 lignes, 13 colonnes)
+- Licence : Database Contents License (DbCL) v1.0,
+  https://opendatacommons.org/licenses/dbcl/1-0/
 ## Installation et lancement
 ```
 pip install -r requirements.txt
