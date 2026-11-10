@@ -21,3 +21,21 @@ def extraire_nombre(colonne: pd.Series) -> pd.Series:
     """
     premier_mot = colonne.str.split(" ").str[0]
     return pd.to_numeric(premier_mot, errors="coerce")
+
+def nettoyer_donnees(df: pd.DataFrame) -> pd.DataFrame:
+    """Nettoie le jeu de données des voitures d'occasion.
+
+    Reçoit : le tableau brut retourné par charger_donnees.
+    Retourne : un tableau sans doublons ni valeurs manquantes, où
+    mileage, engine et max_power sont des nombres et où la colonne
+    name est remplacée par la marque.
+    """
+    df = df.drop_duplicates()
+    df = df.drop(columns=["torque"])
+    df = df.dropna()
+    for nom in ["mileage", "engine", "max_power"]:
+        df[nom] = extraire_nombre(df[nom])
+    df = df.dropna()
+    df["marque"] = df["name"].str.split(" ").str[0]
+    df = df.drop(columns=["name"])
+    return df
