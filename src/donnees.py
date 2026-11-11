@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 def charger_donnees(chemin: str) -> pd.DataFrame:
     """Charge le jeu de données CSV des voitures d'occasion.
@@ -39,3 +39,17 @@ def nettoyer_donnees(df: pd.DataFrame) -> pd.DataFrame:
     df["marque"] = df["name"].str.split(" ").str[0]
     df = df.drop(columns=["name"])
     return df
+
+def tracer_exploration(df: pd.DataFrame, chemin_image: str) -> None:
+    """Enregistre un nuage de points du prix de vente selon l'année.
+
+    Reçoit : df, le tableau nettoyé, et chemin_image, le fichier PNG à créer.
+    Ne retourne rien : l'image est enregistrée à l'emplacement chemin_image.
+    """
+    plt.figure()
+    plt.scatter(df["year"], df["selling_price"], alpha=0.3)
+    plt.title("Prix de vente des voitures d'occasion selon l'année")
+    plt.xlabel("Année")
+    plt.ylabel("Prix de vente (roupies)")
+    plt.savefig(chemin_image)
+    plt.close()
