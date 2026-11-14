@@ -30,7 +30,6 @@ def nettoyer_donnees(df: pd.DataFrame) -> pd.DataFrame:
     mileage, engine et max_power sont des nombres et où la colonne
     name est remplacée par la marque.
     """
-    df = df.drop_duplicates()
     df = df.drop(columns=["torque"])
     df = df.dropna()
     for nom in ["mileage", "engine", "max_power"]:
@@ -38,6 +37,8 @@ def nettoyer_donnees(df: pd.DataFrame) -> pd.DataFrame:
     df = df.dropna()
     df["marque"] = df["name"].str.split(" ").str[0]
     df = df.drop(columns=["name"])
+    df = df.drop_duplicates()
+
     return df
 
 def tracer_exploration(df: pd.DataFrame, chemin_image: str) -> None:
