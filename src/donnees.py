@@ -106,3 +106,21 @@ class VariableNumerique(Variable):
                 f"{self.nom} : la valeur doit être entre {self._minimum} et {self._maximum}"
             )
         return nombre
+    
+class VariableCategorielle(Variable):
+    """Variable catégorielle : la saisie doit faire partie d'une liste de valeurs permises."""
+
+    def __init__(self, nom: str, valeurs: list[str]) -> None:
+        super().__init__(nom)
+        self._valeurs = valeurs
+
+    def valider(self, saisie: str) -> str:
+        """Vérifie que la saisie est une valeur permise.
+
+        Reçoit : le texte choisi par l'utilisateur (ex. "Diesel").
+        Retourne : la saisie, si elle est permise.
+        Lève DonneeInvalideError si la saisie n'est pas dans la liste.
+        """
+        if saisie not in self._valeurs:
+            raise DonneeInvalideError(f"{self.nom} : choisir parmi {self._valeurs}")
+        return saisie
