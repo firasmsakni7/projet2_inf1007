@@ -54,3 +54,55 @@ def tracer_exploration(df: pd.DataFrame, chemin_image: str) -> None:
     plt.ylabel("Prix de vente (roupies)")
     plt.savefig(chemin_image)
     plt.close()
+
+from src.exceptions import DonneeInvalideError
+
+
+class Variable:
+    """Variable d'entrée du modèle, identifiée par son nom.
+
+    Classe parente de VariableNumerique et VariableCategorielle.
+    """
+
+    def __init__(self, nom: str) -> None:
+        self._nom = nom
+
+    @property
+    def nom(self) -> str:
+        """Retourne le nom de la variable (lecture seule)."""
+        return self._nom
+
+    def valider(self, saisie: str):
+        """Vérifie une saisie de l'utilisateur.
+
+        Redéfinie par chaque classe enfant.
+        Lève NotImplementedError si elle est appelée sur Variable.
+        """
+        raise NotImplementedError("à redéfinir")
+
+
+class VariableNumerique(Variable):
+    """Variable numérique dont la valeur doit être dans un intervalle."""
+
+    def __init__(self, nom: str, minimum: float, maximum: float) -> None:
+        super().__init__(nom)
+        self._minimum = minimum
+        self._maximum = maximum
+
+    def valider(self, saisie: str) -> float:
+        """Convertit la saisie en nombre et vérifie l'intervalle.
+
+        Reçoit : le texte tapé par l'utilisateur (ex. "2015").
+        Retourne : le nombre (ex. 2015.0).
+        Lève DonneeInvalideError si la saisie est vide, n'est pas
+        un nombre, ou est hors de l'intervalle.
+        """
+        try:
+            nombre = float(saisie)
+        except ValueError:
+            raise DonneeInvalideError(f"{self.nom} : la valeur doit être un nombre")
+        if nombre < self._minimum or nombre > self._maximum:
+            raise DonneeInvalideError(
+                f"{self.nom} : la valeur doit être entre {self._minimum} et {self._maximum}"
+            )
+        return nombre
