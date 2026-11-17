@@ -2,6 +2,10 @@
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.pipeline import Pipeline
 
 
 def rmse_numpy(reels: list[float], predictions: list[float]) -> float:
@@ -53,4 +57,66 @@ def separer_donnees(df: pd.DataFrame,cible: str = "selling_price") -> tuple[pd.D
 
     return X_train, X_test, y_train, y_test
 
+def modele_reference(y_train: pd.Series, y_test: pd.Series) -> float:
+    """Calcule la RMSE d'un modele qui predit toujours le prix moyen.
 
+    Recoit : les prix d'entrainement et de test.
+    Retourne : la RMSE du modele de reference.
+    Leve ValueError si les donnees sont vides.
+    """
+    if y_train.empty or y_test.empty:
+        raise ValueError("Les donnees ne peuvent pas etre vides.")
+
+    prix_moyen = y_train.mean()
+
+    predictions = np.full(len(y_test), prix_moyen)
+
+    return rmse_numpy(y_test.to_numpy(), predictions)
+
+def entrainer_modele(
+    X_train: pd.DataFrame,
+    y_train: pd.Series
+) -> Pipeline:
+    """Entraine une foret aleatoire pour predire le prix des voitures.
+
+    Recoit : les caracteristiques et les prix d'entrainement.
+    Retourne : le pipeline entraine.
+    Leve ValueError si les donnees sont vides ou incompatibles.
+    """
+    if X_train.empty or y_train.empty:
+        raise ValueError("Les donnees d'entrainement sont vides.")
+
+    if len(X_train) != len(y_train):
+        raise ValueError("Les tailles de X et y sont differentes.")
+
+    colonnes_cat = X_train.select_dtypes(
+        include=["object", "category"]
+    ).columns.tolist()
+
+    colonnes_num = X_train.select_dtypes(
+        include="number"
+    ).columns.tolist()
+
+    pretraitement = ColumnTransformer(
+        transformers=[
+            ("categories",
+             OneHotEncoder(handle_unknown="ignore"),
+             colonnes_cat),
+            ("numeriques", "passthrough", colonnes_num)
+        ]
+    )
+
+    foret = RandomForestRegressor(
+        n_estimators=100,
+        random_state=42,
+        n_jobs=-1
+    )
+
+    modele = Pipeline(steps=[
+        ("pretraitement", pretraitement),
+        ("foret", foret)
+    ])
+
+    modele.fit(X_train, y_train)
+
+    return modele
