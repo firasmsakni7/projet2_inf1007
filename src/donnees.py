@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import csv
 def charger_donnees(chemin: str) -> pd.DataFrame:
     """Charge le jeu de données CSV des voitures d'occasion.
 
@@ -146,3 +146,23 @@ def construire_variables(df: pd.DataFrame, cible: str = "selling_price") -> list
         else:
             variables.append(VariableCategorielle(nom, sorted(df[nom].unique().tolist())))
     return variables
+
+def ajouter_historique(chemin: str, saisies: dict, prix: float) -> None:
+    """Ajoute une prédiction à la fin du fichier CSV d'historique.
+
+    Crée le fichier avec une ligne d'en-tête s'il n'existe pas encore.
+    """
+    nouveau = not os.path.exists(chemin)
+    with open(chemin, "a", encoding="utf-8", newline="") as f:
+        ecrivain = csv.writer(f)
+        if nouveau:
+            ecrivain.writerow(list(saisies.keys()) + ["prix_predit"])
+        ecrivain.writerow(list(saisies.values()) + [round(prix)])
+
+
+def lire_historique(chemin: str) -> list[list[str]]:
+    """Retourne les lignes de l'historique (en-tête comprise), ou [] s'il n'existe pas."""
+    if not os.path.exists(chemin):
+        return []
+    with open(chemin, encoding="utf-8", newline="") as f:
+        return list(csv.reader(f))
