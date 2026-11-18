@@ -33,14 +33,15 @@ Modèle proposé : `RandomForestRegressor` (100 arbres, profondeur max. 10, 3 ex
 
 ### Résultats et limites
 
-Le README de la branche `firas-interface` indiquait les valeurs suivantes, qui **n'ont pas encore été reproduites sur le code intégré dans ce paquet** :
+Résultats sur les 1 340 voitures de test (graine 42), obtenus avec `python entrainer_modele.py --validation-c` et enregistrés dans `modeles/metadonnees.json` :
 
-| Métrique indiquée par Firas | Valeur déclarée (INR) |
+| Modèle | RMSE (INR) |
 |---|---:|
-| RMSE de la référence | 506 377 |
-| RMSE de la forêt | 147 030 |
+| Référence (prix moyen) | 506 377 |
+| Régression linéaire faite à la main (`src/lineaire.py`) | 259 550 |
+| Forêt aléatoire (modèle retenu) | 147 030 |
 
-**Pour les résultats définitifs**, exécuter `python entrainer_modele.py --validation-c` après la validation C, puis recopier les résultats affichés ici et dans `DECISIONS.md`. Les métriques et la répartition des prix sont aussi sauvegardées dans `modeles/metadonnees.json`. Les résultats définitifs peuvent différer des valeurs antérieures puisque les colonnes et paramètres doivent être identiques pour comparer correctement.
+R² de la forêt : 0,916. La forêt divise l'erreur de la référence par 3,4 ; elle est retenue.
 
 Limites : échantillon ancien et représentatif du marché indien seulement, absence d'informations sur l'état réel des véhicules, annonces de véhicules haut de gamme peu nombreuses, résultats statistiquement sensibles aux valeurs atypiques. Les fourchettes min/max affichées dans l'interface viennent uniquement des données d'entraînement.
 
