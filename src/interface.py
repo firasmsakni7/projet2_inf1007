@@ -1,5 +1,13 @@
+"""Interface Tkinter écrite par Firas, avec le branchement du modèle d'Ali.
+
+Les champs, les validations, l'historique et le graphique viennent de la branche
+firas-interface. L'intégration remplace le prix provisoire 0.0 par une véritable
+prédiction et construit les champs à partir des métadonnées du modèle.
+"""
+import os
 import tkinter as tk
 from tkinter import messagebox, ttk
+from typing import Any
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -11,88 +19,131 @@ from src.donnees import (
     lire_historique,
 )
 from src.exceptions import DonneeInvalideError
+from src.modele import ModelePrixVoiture
 
-CHEMIN_HISTORIQUE = "donnees/historique.csv"
+RACINE_PROJET = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CHEMIN_HISTORIQUE = os.path.join(RACINE_PROJET, "donnees", "historique.csv")
 
 
 class Application:
-    """Fenêtre principale : estime le prix d'une voiture d'occasion."""
+    """Fenêtre principale : saisit les variables et affiche une estimation."""
 
-    def __init__(self, variables: list[Variable], prix_donnees) -> None:
-        self._variables = variables          # composition : l'application contient les variables
-        self._prix_donnees = prix_donnees    # les prix des voitures du jeu de données
-        self._champs = {}                    # nom de la variable -> champ de saisie
+    def __init__(
+        self,
+        variables: list[Variable],
+        prix_donnees: Any,
+        modele: ModelePrixVoiture,
+    ) -> None:
+        """Prépare les champs et le graphique à partir d'objets composés."""
+        self._variables = variables       # Composition : contient des objets Variable.
+        self._modele = modele             # Composition : contient le modèle chargé.
+        self._prix_donnees = prix_donnees
+        self._champs: dict[str, tk.Widget] = {}
         self._fenetre = tk.Tk()
         self._fenetre.title("Prix d'une voiture d'occasion")
-        tk.Label(self._fenetre, text="Estimez le prix de votre voiture",
-                 font=("Arial", 16)).pack(pady=10)
+        self._fenetre.geometry("650x790")
+        tk.Label(
+            self._fenetre,
+            text="Estimez le prix de votre voiture",
+            font=("Arial", 16),
+        ).pack(pady=8)
+        tk.Label(
+            self._fenetre,
+            text="Exercice pédagogique — prix indicatif, pas un conseil d'achat ou de vente.",
+            wraplength=610,
+            fg="#555555",
+        ).pack(pady=2)
         self._creer_champs()
-        tk.Button(self._fenetre, text="Prédire", command=self._predire).pack(pady=10)
+        tk.Button(self._fenetre, text="Prédire", command=self._predire).pack(pady=7)
         self._resultat = tk.Label(self._fenetre, text="", font=("Arial", 14))
-        self._resultat.pack(pady=10)
-        tk.Button(self._fenetre, text="Voir l'historique",
-                  command=self._afficher_historique).pack(pady=5)
-        self._figure = Figure(figsize=(5, 3))
+        self._resultat.pack(pady=7)
+        tk.Button(
+            self._fenetre,
+            text="Voir l'historique",
+            command=self._afficher_historique,
+        ).pack(pady=4)
+        self._figure = Figure(figsize=(5.6, 2.8), dpi=100)
         self._axes = self._figure.add_subplot()
         self._canvas = FigureCanvasTkAgg(self._figure, master=self._fenetre)
-        self._canvas.get_tk_widget().pack(pady=10)
+        self._canvas.get_tk_widget().pack(pady=10, fill="both", expand=True)
         self._dessiner_graphique(None)
 
     def _creer_champs(self) -> None:
-        """Crée une ligne (étiquette + champ) par variable."""
+        """Crée une étiquette et un champ par variable définie par le modèle."""
         cadre = tk.Frame(self._fenetre)
         cadre.pack(padx=20, pady=10)
         for ligne, variable in enumerate(self._variables):
-            tk.Label(cadre, text=variable.nom).grid(row=ligne, column=0, sticky="w", pady=2)
+            tk.Label(cadre, text=variable.nom).grid(
+                row=ligne, column=0, sticky="w", pady=2, padx=5
+            )
             if isinstance(variable, VariableCategorielle):
-                champ = ttk.Combobox(cadre, values=variable.valeurs, state="readonly")
+                champ = ttk.Combobox(
+                    cadre, values=variable.valeurs, state="readonly", width=30
+                )
             else:
-                champ = tk.Entry(cadre)
+                champ = tk.Entry(cadre, width=33)
             champ.grid(row=ligne, column=1, pady=2)
             self._champs[variable.nom] = champ
 
-    def _lire_saisies(self) -> dict:
-        """Lit et valide chaque champ. Lève DonneeInvalideError si une saisie est invalide."""
-        saisies = {}
+    def _lire_saisies(self) -> dict[str, float | str]:
+        """Lit les champs et valide les saisies avec le polymorphisme."""
+        saisies: dict[str, float | str] = {}
         for variable in self._variables:
             texte = self._champs[variable.nom].get().strip()
-            saisies[variable.nom] = variable.valider(texte)   # polymorphisme
+            saisies[variable.nom] = variable.valider(texte)
         return saisies
 
     def _predire(self) -> None:
-        """Appelée par le bouton : valide les saisies, enregistre et affiche le résultat."""
+        """Prédit, affiche et historise une voiture ; signale toute erreur attendue."""
         try:
             saisies = self._lire_saisies()
-        except DonneeInvalideError as erreur:
+            prix = self._modele.predire(saisies)
+        except (DonneeInvalideError, ValueError, RuntimeError) as erreur:
             messagebox.showerror("Saisie invalide", str(erreur))
             return
-        prix = 0.0       # TEMPORAIRE : remplacé par la vraie prédiction du modèle d'Ali
-        ajouter_historique(CHEMIN_HISTORIQUE, saisies, prix)
-        self._resultat.config(text=f"Prix estimé : {prix:,.0f} roupies")
+
+        self._resultat.config(text=f"Prix estimé : {prix:,.0f} roupies (INR)")
         self._dessiner_graphique(prix)
+        try:
+            ajouter_historique(CHEMIN_HISTORIQUE, saisies, prix)
+        except OSError as erreur:
+            messagebox.showwarning(
+                "Historique indisponible",
+                f"Prédiction calculée, mais l'historique n'a pas été enregistré : {erreur}",
+            )
 
     def _afficher_historique(self) -> None:
-        """Affiche les 10 dernières prédictions dans une petite fenêtre."""
-        lignes = lire_historique(CHEMIN_HISTORIQUE)
+        """Affiche les dix dernières prédictions enregistrées."""
+        try:
+            lignes = lire_historique(CHEMIN_HISTORIQUE)
+        except OSError as erreur:
+            messagebox.showerror("Historique indisponible", str(erreur))
+            return
         if len(lignes) <= 1:
             messagebox.showinfo("Historique", "Aucune prédiction pour l'instant.")
             return
-        texte = "\n".join(", ".join(ligne) for ligne in lignes[-10:])
-        messagebox.showinfo("Historique", texte)
+        texte = ", ".join(lignes[0]) + "\n" + "\n".join(
+            ", ".join(ligne) for ligne in lignes[-10:]
+        )
+        messagebox.showinfo("Historique (10 dernières)", texte)
 
-    def _dessiner_graphique(self, prix) -> None:
-        """Dessine la répartition des prix et, si prix est donné, la position de la voiture."""
+    def _dessiner_graphique(self, prix: float | None) -> None:
+        """Dessine la distribution des prix et la position de la prédiction."""
         self._axes.clear()
-        self._axes.hist(self._prix_donnees, bins=50)
+        self._axes.hist(self._prix_donnees, bins=50, label="Voitures du dataset")
         if prix is not None:
             self._axes.axvline(prix, color="red", label="Votre voiture")
-            self._axes.legend()
-        self._axes.set_title("Position de votre voiture parmi les prix")
-        self._axes.set_xlabel("Prix de vente (roupies)")
+        self._axes.legend()
+        self._axes.set_title("Prix des voitures d'occasion")
+        self._axes.set_xlabel("Prix de vente (roupies indiennes)")
         self._axes.set_ylabel("Nombre de voitures")
         self._figure.tight_layout()
         self._canvas.draw()
 
     def lancer(self) -> None:
-        """Affiche la fenêtre et attend les actions de l'utilisateur."""
+        """Ouvre la boucle d'événements Tkinter, jusqu'à fermeture."""
         self._fenetre.mainloop()
+
+    def __str__(self) -> str:
+        """Retourne une description brève de l'application."""
+        return f"Application ({len(self._variables)} variables, modèle {self._modele})"

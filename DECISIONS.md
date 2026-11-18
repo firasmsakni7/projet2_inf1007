@@ -1,10 +1,14 @@
-# Fiche de decisions
+# Fiche de décisions — Projet INF1007
 
-| Choix | Options envisagees | Choix retenu et justification | Valide par l'auxiliaire (date) |
+Les validations A et B ci-dessous sont recopiées du document de Firas. Pour C et D, la date reste à compléter **uniquement après une vraie validation avec l'auxiliaire**.
+
+| Choix | Options envisagées | Choix retenu et justification | Validé par l'auxiliaire (date) |
 |---|---|---|---|
-| Domaine | Coupe du monde, location de velos, voitures d'occasion | Voitures d'occasion : cible numerique claire, application utile pour acheter ou vendre une voiture | Samuelle St-Onge, 9 novembre 2026 (Discord) |
-| Jeu de donnees | CarDekho (Kaggle), jeu Mendeley (prix en taka, ecrits en texte) | CarDekho car_details_v3.csv : 8 128 lignes, variables numeriques et categorielles, licence DbCL v1.0, aucune donnee personnelle | Samuelle St-Onge, 9 novembre 2026 (Discord) |
-| Cible et metrique | | | |
-| Modele | | | |
-| Technologie d'interface | | | |
-| Nettoyage des données | Garder ou retirer les doublons, torque, les lignes incomplètes ; garder name ou en extraire la marque | 1) Retirer torque : trop de formats différents (« 190Nm@ 2000rpm », « 22.4 kgm at… »). 2) Retirer les lignes incomplètes (environ 220, moins de 3 %). 3) Convertir mileage, engine et max_power en nombres en retirant l'unité ; une valeur sans nombre (« bhp ») devient manquante et sa ligne est retirée. 4) Remplacer name par la marque (31 valeurs au lieu de plusieurs milliers). 5) Retirer les doublons EN DERNIER : une même voiture ne doit pas être à la fois dans l'entraînement et le test. Au départ, on les retirait en premier, mais un test (test_nettoyer_donnees) a montré qu'il restait 19 doublons : des annonces qui ne différaient que par name ou torque devenaient identiques après ces étapes. Résultat : 6 698 lignes, 12 colonnes. Limite : mileage mélange kmpl et km/kg (gaz). | |
+| Domaine | Coupe du monde, location de vélos, voitures d'occasion | Voitures d'occasion : cible numérique claire, application qui estime un prix | Samuelle St-Onge, 9 novembre 2026 (Discord), selon Firas |
+| Jeu de données | CarDekho Kaggle, jeu Mendeley (prix en taka écrits en texte) | `car_details_v3.csv` : 8 128 lignes, variables numériques et catégorielles, licence DbCL v1.0 indiquée | Samuelle St-Onge, 9 novembre 2026 (Discord), selon Firas |
+| Nettoyage | Retirer `torque`, traiter les absences, retirer les doublons avant ou après transformations, garder le nom complet ou seulement la marque | Supprimer `torque` (formats difficiles à interpréter), convertir `mileage`, `engine` et `max_power`, extraire `marque`, retirer les doublons en dernier : le test avait révélé 19 doublons résiduels quand l'ordre était différent. 6 698 lignes annoncées après nettoyage. | À discuter |
+| Cible et métrique (C) | Classification/régression ; MAE, RMSE, R² | Régression pour `selling_price` (INR). RMSE : erreur exprimée en roupies, grosses erreurs davantage pénalisées ; R² comme indicateur complémentaire. Référence : moyenne des prix d'entraînement. | **À valider, date non attribuée** |
+| Modèle (C) | Régression linéaire, arbre de décision, forêt aléatoire | Forêt aléatoire de 100 arbres : relations non linéaires possibles entre prix, âge et motorisation. Limitation de profondeur et taille minimum des feuilles pour réduire le surajustement. Séparation train/test 80/20, graine 42, encodage dans le pipeline sans fuite des données de test. | **À valider, date non attribuée** |
+| Caractéristiques du modèle | Onze colonnes issues de `nettoyer_donnees()` ; neuf colonnes sélectionnées | Neuf entrées : `year`, `km_driven`, `engine`, `max_power`, `fuel`, `seller_type`, `transmission`, `owner`, `marque`. `mileage` exclue (unités mixtes) et `seats` exclue (simplifier l'interface). | À discuter |
+| Technologie et maquette (D) | Tkinter, Streamlit | Tkinter : interface locale incluse avec Python, adaptée aux champs numériques, listes, messages d'erreur et graphique Matplotlib intégré. Maquette : formulaire en haut, résultat et historique au milieu, histogramme en bas. | **À valider, date non attribuée** |
+| Intégration de l'interface | Construire les champs à partir des colonnes du CSV ou des métadonnées du modèle | Construire la liste `Variable` à partir de `modeles/metadonnees.json` plutôt que du CSV brut : les neuf champs correspondent exactement au pipeline enregistré et respectent l'énoncé. | Décision technique de l'équipe, à présenter |
