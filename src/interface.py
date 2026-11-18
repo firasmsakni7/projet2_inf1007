@@ -2,7 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 
 from src.donnees import Variable, VariableCategorielle
+from tkinter import messagebox
 
+from src.exceptions import DonneeInvalideError
 
 class Application:
     """Fenêtre principale : estime le prix d'une voiture d'occasion."""
@@ -15,6 +17,10 @@ class Application:
         tk.Label(self._fenetre, text="Estimez le prix de votre voiture",
                  font=("Arial", 16)).pack(pady=10)
         self._creer_champs()
+        tk.Button(self._fenetre, text="Prédire", command=self._predire).pack(pady=10)
+        self._resultat = tk.Label(self._fenetre, text="", font=("Arial", 14))
+        self._resultat.pack(pady=10)
+
 
     def _creer_champs(self) -> None:
         """Crée une ligne (étiquette + champ) par variable."""
@@ -32,3 +38,22 @@ class Application:
     def lancer(self) -> None:
         """Affiche la fenêtre et attend les actions de l'utilisateur."""
         self._fenetre.mainloop()
+    
+    
+    def _lire_saisies(self) -> dict:
+        """Lit et valide chaque champ. Lève DonneeInvalideError si une saisie est invalide."""
+        saisies = {}
+        for variable in self._variables:
+            texte = self._champs[variable.nom].get().strip()
+            saisies[variable.nom] = variable.valider(texte)   # polymorphisme
+        return saisies
+
+
+    def _predire(self) -> None:
+        """Appelée par le bouton : valide les saisies et affiche le résultat."""
+        try:
+            saisies = self._lire_saisies()
+        except DonneeInvalideError as erreur:
+            messagebox.showerror("Saisie invalide", str(erreur))
+            return
+        self._resultat.config(text="Saisies valides")
