@@ -38,7 +38,7 @@ Le README de la branche `firas-interface` indiquait les valeurs suivantes, qui *
 | Métrique indiquée par Firas | Valeur déclarée (INR) |
 |---|---:|
 | RMSE de la référence | 506 377 |
-| RMSE de la forêt | 144 243 |
+| RMSE de la forêt | 147 030 |
 
 **Pour les résultats définitifs**, exécuter `python entrainer_modele.py --validation-c` après la validation C, puis recopier les résultats affichés ici et dans `DECISIONS.md`. Les métriques et la répartition des prix sont aussi sauvegardées dans `modeles/metadonnees.json`. Les résultats définitifs peuvent différer des valeurs antérieures puisque les colonnes et paramètres doivent être identiques pour comparer correctement.
 
