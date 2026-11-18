@@ -1,6 +1,6 @@
 # Journal d'utilisation de l'IA — Projet INF1007
 
-Chaque ligne décrit un usage réel documenté, avec son statut de vérification. La vérification finale sur le vrai CSV et l'intégration GitHub restent à faire.
+Chaque ligne décrit un usage réel documenté, avec son statut de vérification. Intégration terminée : 32 tests passent et la CI est verte.
 
 | Outil | Ce qui a été demandé | Réponse reçue | Vérification effectuée | Décision |
 |---|---|---|---|---|
