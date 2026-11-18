@@ -124,3 +124,25 @@ class VariableCategorielle(Variable):
         if saisie not in self._valeurs:
             raise DonneeInvalideError(f"{self.nom} : choisir parmi {self._valeurs}")
         return saisie
+    @property
+    def valeurs(self) -> list[str]:
+        """Retourne la liste des valeurs permises (lecture seule)."""
+        return self._valeurs
+
+    
+def construire_variables(df: pd.DataFrame, cible: str = "selling_price") -> list[Variable]:
+    """Crée une Variable par colonne d'entrée du tableau nettoyé.
+
+    Colonne numérique : VariableNumerique (intervalle = min et max des données).
+    Colonne de texte : VariableCategorielle (valeurs = les valeurs présentes).
+    La colonne cible est ignorée.
+    """
+    variables = []
+    for nom in df.columns:
+        if nom == cible:
+            continue
+        if pd.api.types.is_numeric_dtype(df[nom]):
+            variables.append(VariableNumerique(nom, float(df[nom].min()), float(df[nom].max())))
+        else:
+            variables.append(VariableCategorielle(nom, sorted(df[nom].unique().tolist())))
+    return variables
