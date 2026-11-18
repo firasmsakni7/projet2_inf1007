@@ -1,0 +1,162 @@
+{
+  "cible": "selling_price",
+  "unite": "INR",
+  "colonnes_entree": [
+    "year",
+    "km_driven",
+    "engine",
+    "max_power",
+    "fuel",
+    "seller_type",
+    "transmission",
+    "owner",
+    "marque"
+  ],
+  "variables": {
+    "year": {
+      "type": "numerique",
+      "minimum": 1994.0,
+      "maximum": 2020.0
+    },
+    "km_driven": {
+      "type": "numerique",
+      "minimum": 1000.0,
+      "maximum": 2360457.0
+    },
+    "engine": {
+      "type": "numerique",
+      "minimum": 624.0,
+      "maximum": 3604.0
+    },
+    "max_power": {
+      "type": "numerique",
+      "minimum": 32.8,
+      "maximum": 400.0
+    },
+    "fuel": {
+      "type": "categorielle",
+      "valeurs": [
+        "CNG",
+        "Diesel",
+        "LPG",
+        "Petrol"
+      ]
+    },
+    "seller_type": {
+      "type": "categorielle",
+      "valeurs": [
+        "Dealer",
+        "Individual",
+        "Trustmark Dealer"
+      ]
+    },
+    "transmission": {
+      "type": "categorielle",
+      "valeurs": [
+        "Automatic",
+        "Manual"
+      ]
+    },
+    "owner": {
+      "type": "categorielle",
+      "valeurs": [
+        "First Owner",
+        "Fourth & Above Owner",
+        "Second Owner",
+        "Test Drive Car",
+        "Third Owner"
+      ]
+    },
+    "marque": {
+      "type": "categorielle",
+      "valeurs": [
+        "Ambassador",
+        "Ashok",
+        "Audi",
+        "BMW",
+        "Chevrolet",
+        "Daewoo",
+        "Datsun",
+        "Fiat",
+        "Force",
+        "Ford",
+        "Honda",
+        "Hyundai",
+        "Isuzu",
+        "Jaguar",
+        "Jeep",
+        "Kia",
+        "Land",
+        "Lexus",
+        "MG",
+        "Mahindra",
+        "Maruti",
+        "Mercedes-Benz",
+        "Mitsubishi",
+        "Nissan",
+        "Opel",
+        "Renault",
+        "Skoda",
+        "Tata",
+        "Toyota",
+        "Volkswagen",
+        "Volvo"
+      ]
+    }
+  },
+  "metriques": {
+    "rmse": 147029.85682482348,
+    "rmse_reference": 506376.5047706529,
+    "r2": 0.9156781823669147,
+    "nombre_entrainement": 5358,
+    "nombre_test": 1340,
+    "graine": 42
+  },
+  "distribution": {
+    "bornes": [
+      29999.0,
+      528499.05,
+      1026999.1,
+      1525499.15,
+      2023999.2,
+      2522499.25,
+      3020999.3,
+      3519499.35,
+      4017999.4,
+      4516499.45,
+      5014999.5,
+      5513499.55,
+      6011999.6,
+      6510499.649999999,
+      7008999.7,
+      7507499.75,
+      8005999.8,
+      8504499.85,
+      9002999.9,
+      9501499.95,
+      10000000.0
+    ],
+    "effectifs": [
+      3362,
+      1618,
+      201,
+      92,
+      16,
+      27,
+      15,
+      6,
+      3,
+      2,
+      6,
+      8,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ]
+  }
+}

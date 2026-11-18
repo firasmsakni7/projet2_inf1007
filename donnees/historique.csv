@@ -1,0 +1,16 @@
+year,km_driven,engine,max_power,fuel,seller_type,transmission,owner,marque,prix_predit
+2018.0,100000.0,625.0,400.0,Diesel,Individual,Automatic,Second Owner,BMW,5207293
+2018.0,100000.0,625.0,400.0,Diesel,Individual,Automatic,Second Owner,Ambassador,5095233
+2018.0,50000.0,1200.0,80.0,Petrol,Individual,Manual,First Owner,Maruti,478870
+2015.0,6666.0,624.0,50.0,Diesel,Individual,Manual,First Owner,BMW,266848
+2015.0,6666.0,624.0,50.0,Diesel,Individual,Manual,First Owner,Ambassador,266848
+2015.0,6666.0,624.0,50.0,Diesel,Individual,Manual,First Owner,Ambassador,266848
+2015.0,6666.0,624.0,50.0,Diesel,Individual,Manual,First Owner,Ashok,266848
+2015.0,6666.0,624.0,50.0,Diesel,Individual,Manual,First Owner,Fiat,266848
+2015.0,6666.0,624.0,50.0,Diesel,Individual,Manual,First Owner,Volkswagen,266848
+2015.0,6666.0,624.0,50.0,Diesel,Individual,Manual,Fourth & Above Owner,Volkswagen,253545
+2015.0,6666.0,624.0,50.0,Diesel,Individual,Manual,Fourth & Above Owner,Nissan,253545
+2015.0,6666.0,624.0,50.0,Diesel,Individual,Manual,Fourth & Above Owner,Mercedes-Benz,253545
+2015.0,6666.0,624.0,50.0,CNG,Individual,Manual,Fourth & Above Owner,Mercedes-Benz,248866
+2018.0,100000.0,2700.0,400.0,Diesel,Individual,Automatic,Third Owner,Volkswagen,5153018
+2018.0,100000.0,2760.0,400.0,Diesel,Individual,Automatic,Third Owner,Volkswagen,5119218
