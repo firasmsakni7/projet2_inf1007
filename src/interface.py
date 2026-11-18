@@ -23,6 +23,8 @@ from src.modele import ModelePrixVoiture
 
 RACINE_PROJET = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHEMIN_HISTORIQUE = os.path.join(RACINE_PROJET, "donnees", "historique.csv")
+# Taux indicatif au 17 novembre 2026, fixe pour fonctionner sans connexion Internet.
+TAUX_INR_USD = 0.0107
 
 
 class Application:
@@ -55,8 +57,16 @@ class Application:
         ).pack(pady=2)
         self._creer_champs()
         tk.Button(self._fenetre, text="Prédire", command=self._predire).pack(pady=7)
-        self._resultat = tk.Label(self._fenetre, text="", font=("Arial", 14))
+        self._resultat = tk.Label(
+            self._fenetre, text="", font=("Arial", 14), wraplength=610
+        )
         self._resultat.pack(pady=7)
+        tk.Label(
+            self._fenetre,
+            text="Conversion indicative au taux fixe du 17/11/2026",
+            fg="#555555",
+            font=("Arial", 9),
+        ).pack(pady=1)
         tk.Button(
             self._fenetre,
             text="Voir l'historique",
@@ -102,7 +112,10 @@ class Application:
             messagebox.showerror("Saisie invalide", str(erreur))
             return
 
-        self._resultat.config(text=f"Prix estimé : {prix:,.0f} roupies (INR)")
+        prix_usd = prix * TAUX_INR_USD
+        self._resultat.config(
+            text=f"Prix estimé : {prix:,.0f} ₹ (INR) ≈ {prix_usd:,.2f} $ US (USD)"
+        )
         self._dessiner_graphique(prix)
         try:
             ajouter_historique(CHEMIN_HISTORIQUE, saisies, prix)
