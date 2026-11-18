@@ -113,8 +113,7 @@ python -m coverage run -m pytest
 python -m coverage report -m
 ```
 
-Couverture des tests : 68 % sur l'ensemble du projet (mesurée avec coverage et pytest). Le fichier modele.py atteint 85 %. Les 28 tests passent.
-
+Couverture des tests : 70 % sur le code du projet (`src/`), mesurée avec `coverage run -m pytest` puis `coverage report`. `lineaire.py` est à 100 %, `modele.py` à 85 %, `donnees.py` à 63 % et `interface.py` à 38 %, car les fenêtres Tkinter ont été testées à la main (cas normal, saisie invalide, graphique). Les 32 tests passent.
 ## Documentation officielle consultée
 
 - [pandas — 10 minutes to pandas](https://pandas.pydata.org/docs/user_guide/10min.html)
