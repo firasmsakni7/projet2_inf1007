@@ -11,10 +11,10 @@ Cette application locale Tkinter estime le **prix de vente d'une voiture d'occas
 ## Jeu de données et licence
 
 - Source : Nehal Birla, [Vehicle dataset from CarDekho (Kaggle)](https://www.kaggle.com/datasets/nehalbirla/vehicle-dataset-from-cardekho).
-- Fichier utilisé : `donnees/car_details_v3.csv` (8 128 lignes et 13 colonnes avant nettoyage, selon la fiche de Firas).
-- Licence indiquée dans le dépôt d'origine : **Database Contents License (DbCL) v1.0** — [texte de la licence](https://opendatacommons.org/licenses/dbcl/1-0/). Vérifier les conditions de redistribution avant de diffuser le CSV dans le dépôt public.
+- Fichier utilisé : `donnees/car_details_v3.csv` (8 128 lignes et 13 colonnes avant nettoyage).
+- Licence indiquée dans le dépôt d'origine : **Database Contents License (DbCL) v1.0** — [texte de la licence](https://opendatacommons.org/licenses/dbcl/1-0/). Cette licence permet de redistribuer le contenu ; le CSV est donc inclus dans `donnees/`.
 - Nettoyage (`src/donnees.py`, Firas) : retrait de `torque` et des valeurs manquantes, conversion des colonnes contenant des unités, remplacement de `name` par `marque`, retrait des doublons après transformation.
-- Nombre annoncé après nettoyage : 6 698 voitures et 12 colonnes. Ce total est **à reconfirmer par exécution sur le CSV de la branche**.
+- Après nettoyage : **6 698 voitures et 12 colonnes** (8 128 → 7 907 sans valeurs manquantes → 7 906 avec unités lisibles → 6 698 sans doublons). Le test `test_nettoyer_donnees` vérifie qu'il ne reste aucun doublon : il avait révélé 19 doublons créés par le remplacement de `name` par `marque` quand les doublons étaient retirés trop tôt.
 - Limite de la source : la colonne `mileage` mélange notamment km/l et km/kg ; elle ne fait pas partie des entrées de notre modèle pour éviter une interprétation incorrecte.
 
 ## Problème de prédiction et modèle
@@ -27,9 +27,9 @@ La **variable cible** est `selling_price` (INR), donc il s'agit d'une **régress
 
 Les colonnes `mileage` et `seats` ne sont pas demandées à l'utilisateur. Les colonnes catégorielles sont transformées avec `OneHotEncoder(handle_unknown="ignore")` dans un `Pipeline` scikit-learn. Les valeurs manquantes éventuelles sont traitées dans le pipeline à partir des **données d'entraînement uniquement**.
 
-Modèle proposé : `RandomForestRegressor` (100 arbres, profondeur max. 10, 3 exemples min. par feuille, graine 42). Séparation reproductible 80 % entraînement / 20 % test. Référence : `DummyRegressor(strategy="mean")`, qui prédit la moyenne des prix de l'entraînement. La métrique principale est la **RMSE**, calculée de manière vectorisée avec NumPy ; nous affichons également R².
+Modèle retenu : `RandomForestRegressor` (100 arbres, profondeur max. 10, 3 exemples min. par feuille, graine 42). Séparation reproductible 80 % entraînement / 20 % test. Référence : `DummyRegressor(strategy="mean")`, qui prédit la moyenne des prix de l'entraînement. La métrique principale est la **RMSE**, calculée de manière vectorisée avec NumPy ; nous affichons également R².
 
-**Validation C :** cible, métrique et modèle doivent être présentés à l'auxiliaire **avant l'entraînement officiel** ; reporter la date dans `DECISIONS.md`.
+Une **régression linéaire faite à la main** (`src/lineaire.py`, moindres carrés avec `np.linalg.lstsq`) sert de second modèle de comparaison ; un test vérifie que ses coefficients sont identiques à ceux de `LinearRegression` de scikit-learn. Les validations avec l'auxiliaire sont notées dans `DECISIONS.md`.
 
 ### Résultats et limites
 
@@ -54,9 +54,7 @@ python -m pip install -r requirements.txt
 python -m pytest
 ```
 
-Vérifier la présence de `donnees/car_details_v3.csv`. Si le fichier n'est pas présent ou ne peut pas être redistribué, le télécharger depuis la page Kaggle ci-dessus et le placer dans `donnees/` sous ce nom.
-
-**Après validation C uniquement**, produire les deux fichiers sauvegardés :
+Le jeu de données `donnees/car_details_v3.csv` et le modèle entraîné (`modeles/`) sont déjà dans le dépôt. Pour réentraîner le modèle (facultatif, environ 1 s) :
 
 ```powershell
 python entrainer_modele.py --validation-c
@@ -75,19 +73,22 @@ La fenêtre recharge `modeles/prix_voiture.joblib` et `modeles/metadonnees.json`
 ```text
 projet2_inf1007/
 ├── main.py                       # charge le modèle et affiche Tkinter
-├── entrainer_modele.py           # entraînement unique et sauvegarde
+├── entrainer_modele.py           # entraînement et sauvegarde du modèle (Ali)
+├── explorer.py                   # premier coup d'œil au CSV : types, absences, doublons (Firas)
+├── essaie_graphique.py           # produit figures/prix_selon_annee.png (Firas)
 ├── src/
-│   ├── donnees.py                # chargement/nettoyage, variables, historique (Firas)
-│   ├── modele.py                 # pipeline, RMSE NumPy, évaluation, prédiction (Ali)
-│   ├── variables_modele.py       # adaptateur : JSON -> objets Variable (intégration)
+│   ├── donnees.py                # chargement, nettoyage, classes Variable, historique (Firas)
 │   ├── exceptions.py             # DonneeInvalideError (Firas)
-│   └── interface.py              # Tkinter, champs, résultat, historique, graphique
-├── donnees/car_details_v3.csv    # source Kaggle, sous réserve de la licence
-├── donnees/historique.csv        # créé par l'application
-├── modeles/                     # joblib et JSON produits après entraînement
-├── figures/                     # graphique d'exploration savefig (Firas)
-├── tests/                       # pytest, dont tests du modèle et de l'interface
-├── .github/workflows/tests.yml  # CI pytest à chaque push
+│   ├── lineaire.py               # régression linéaire faite à la main (Firas)
+│   ├── interface.py              # Tkinter : champs, résultat, historique, graphique (Firas)
+│   ├── modele.py                 # pipeline, RMSE NumPy, évaluation, prédiction (Ali)
+│   └── variables_modele.py       # crée les objets Variable depuis le JSON du modèle (Ali)
+├── donnees/car_details_v3.csv    # source Kaggle, licence DbCL v1.0
+├── donnees/historique.csv        # créé par l'application (ignoré par Git)
+├── modeles/                      # modèle entraîné (joblib) et métadonnées (JSON)
+├── figures/                      # graphique d'exploration (savefig)
+├── tests/                        # 32 tests pytest
+├── .github/workflows/tests.yml   # CI pytest à chaque push
 ├── DECISIONS.md
 ├── JOURNAL_IA.md
 └── requirements.txt
@@ -99,8 +100,8 @@ projet2_inf1007/
 - **Chapitre 6** : fonctions courtes, annotations de type, docstrings, `return` séparé de l'affichage.
 - **Chapitre 7** : le **décorateur `@chronometrer`** utilise `time.perf_counter()` pour mesurer et afficher la durée de la méthode `ModelePrixVoiture.entrainer()`.
 - **Chapitre 8** : exception `DonneeInvalideError`, tests `pytest` (cas normaux, limites, erreurs), `pytest.raises` et `pytest.approx`, CI GitHub Actions.
-- **Chap. 9–11** : classes `Variable`, `VariableNumerique`, `VariableCategorielle`, `ModelePrixVoiture` et `Application` ; héritage et polymorphisme via `Variable.valider()` ; composition dans `Application`, encapsulation avec attributs `_...`, méthode spéciale `ModelePrixVoiture.__str__()`.
-- **Chapitre 12** : calcul vectorisé de la RMSE avec NumPy ; un test compare au calcul scikit-learn.
+- **Chap. 9–11** : classes `Variable`, `VariableNumerique`, `VariableCategorielle`, `ModelePrixVoiture` et `Application` ; héritage et polymorphisme via `Variable.valider()` ; composition dans `Application`, encapsulation avec attributs `_...`, méthodes spéciales `ModelePrixVoiture.__str__()` et `Application.__str__()`.
+- **Chapitre 12** : calcul vectorisé de la RMSE avec NumPy (un test compare au calcul scikit-learn) ; régression linéaire résolue avec `np.linalg.lstsq`.
 - **Chapitre 13** : graphique d'exploration `savefig` et histogramme Matplotlib intégré à Tkinter.
 
 ## Tests, couverture et CI
@@ -114,6 +115,7 @@ python -m coverage report -m
 ```
 
 Couverture des tests : 70 % sur le code du projet (`src/`), mesurée avec `coverage run -m pytest` puis `coverage report`. `lineaire.py` est à 100 %, `modele.py` à 85 %, `donnees.py` à 63 % et `interface.py` à 38 %, car les fenêtres Tkinter ont été testées à la main (cas normal, saisie invalide, graphique). Les 32 tests passent.
+
 ## Documentation officielle consultée
 
 - [pandas — 10 minutes to pandas](https://pandas.pydata.org/docs/user_guide/10min.html)
@@ -122,6 +124,7 @@ Couverture des tests : 70 % sur le code du projet (`src/`), mesurée avec `cover
 - [scikit-learn — ColumnTransformer](https://scikit-learn.org/stable/modules/generated/sklearn.compose.ColumnTransformer.html)
 - [Matplotlib — Embed in Tk](https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_tk_sgskip.html)
 - [Python — Tkinter](https://docs.python.org/3/library/tkinter.html)
+- [NumPy — linalg.lstsq](https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html)
 
 ## Journal d'IA et décisions
 
